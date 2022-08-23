@@ -43,14 +43,18 @@ fun runFile(filePath: String) {
     }
 }
 
-
 fun run(source: String) {
     val scanner = Scanner(source)
-    val tokens = scanner.scanTokens();
+    scanner.scanTokens();
 
+    val tokens = scanner.tokens
+
+    println("=========Scanned Tokens=========")
     for (token in tokens) {
         println(token)
     }
+
+    println("=========Input Source=========")
     print(source)
 }
 
