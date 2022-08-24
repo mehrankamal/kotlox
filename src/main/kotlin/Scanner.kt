@@ -29,7 +29,9 @@ class Scanner(val source: String) {
     )
 
 
-    // Command Query: States that a function should do a command or query only. i.e it should update state or return
+
+
+    // Command Query Separation: States that a function should do a command or query only. i.e. it should update state or return
     // answer to a query but never both
 
     fun scanTokens() {
@@ -41,9 +43,7 @@ class Scanner(val source: String) {
         _tokens.add(Token(TokenType.EOF, "", null, line))
     }
 
-    private fun isAtEnd(): Boolean {
-        return current >= source.length
-    }
+    private fun isAtEnd(): Boolean = current >= source.length
 
     private fun scanToken() {
         val c = advance()
