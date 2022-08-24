@@ -1,5 +1,4 @@
 
-
 class Scanner(val source: String) {
 
     // All objects should be immutable and transform only when business rules allow
@@ -10,12 +9,31 @@ class Scanner(val source: String) {
     var start = 0
     var current = 0
     var line = 1
+    private val keywords = mapOf(
+        "and" to TokenType.AND,
+        "class" to TokenType.CLASS,
+        "else" to TokenType.ELSE,
+        "false" to TokenType.FALSE,
+        "for" to TokenType.FOR,
+        "fun" to TokenType.FUN,
+        "if" to TokenType.IF,
+        "nil" to TokenType.NIL,
+        "or" to TokenType.OR,
+        "print" to TokenType.PRINT,
+        "return" to TokenType.RETURN,
+        "super" to TokenType.SUPER,
+        "this" to TokenType.THIS,
+        "true" to TokenType.TRUE,
+        "var" to TokenType.VAR,
+        "while" to TokenType.WHILE
+    )
+
 
     // Command Query: States that a function should do a command or query only. i.e it should update state or return
     // answer to a query but never both
 
     fun scanTokens() {
-        while(!isAtEnd()) {
+        while (!isAtEnd()) {
             start = current
             scanToken()
         }
@@ -40,12 +58,27 @@ class Scanner(val source: String) {
             '+' -> addToken(TokenType.PLUS)
             ';' -> addToken(TokenType.SEMICOLON)
             '*' -> addToken(TokenType.STAR)
-            '!' -> addToken(if(match('=')) TokenType.BANG_EQUAL else TokenType.BANG)
-            '=' -> addToken(if(match('=')) TokenType.EQUAL_EQUAL else TokenType.EQUAL)
-            '<' -> addToken(if(match('=')) TokenType.LESS_EQUAL else TokenType.LESS)
-            '>' -> addToken(if(match('=')) TokenType.GREATER_EQUAL else TokenType.GREATER)
+            '!' -> addToken(if (match('=')) TokenType.BANG_EQUAL else TokenType.BANG)
+            '=' -> addToken(if (match('=')) TokenType.EQUAL_EQUAL else TokenType.EQUAL)
+            '<' -> addToken(if (match('=')) TokenType.LESS_EQUAL else TokenType.LESS)
+            '>' -> addToken(if (match('=')) TokenType.GREATER_EQUAL else TokenType.GREATER)
+            '/' -> {
+                if (match('/')) {
+                    // A comment goes until the end of the line.
+                    while (peek() != '\n' && !isAtEnd()) advance()
+                } else {
+                    addToken(TokenType.SLASH)
+                }
+            }
 
-            else -> error(line, "Unexpected character: $c")
+            ' ', '\r', '\t' -> {}
+            '\n' -> line++
+            '"' -> string()
+            else -> {
+                if (isDigit(c)) number()
+                else if (isAlphaOrUnderscore(c)) identifier()
+                else error(line, "Unexpected character: $c")
+            }
         }
     }
 
@@ -65,4 +98,51 @@ class Scanner(val source: String) {
         current++
         return true
     }
+
+    private fun peek(): Char = if (isAtEnd()) '\u0000' else source[current]
+
+    private fun string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++
+            advance()
+        }
+
+        if (isAtEnd()) {
+            error(line, "Unterminated string.")
+            return
+        }
+
+        advance()
+
+        val value = source.substring(start + 1, current - 1)
+        addToken(TokenType.STRING, value)
+    }
+
+    private fun isDigit(c: Char): Boolean = c in '0'..'9'
+
+    private fun number() {
+        while (isDigit(peek())) advance()
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            advance()
+            while (isDigit(peek())) advance()
+        }
+        addToken(TokenType.NUMBER, source.substring(start, current).toDouble())
+    }
+
+    private fun peekNext(): Char = if (current + 1 >= source.length) '\u0000' else source[current + 1]
+
+    private fun identifier() {
+        while (isAlphaNumeric(peek())) advance()
+        val text = source.substring(start, current)
+        var type = keywords[text]
+        if (type == null) type = TokenType.IDENTIFIER
+        addToken(type)
+    }
+
+    private fun isAlphaOrUnderscore(c: Char): Boolean = c in 'a'..'z' || c in 'A'..'Z' || c == '_'
+
+    private fun isAlphaNumeric(c: Char): Boolean = isAlphaOrUnderscore(c) || isDigit(c)
+
+
 }
