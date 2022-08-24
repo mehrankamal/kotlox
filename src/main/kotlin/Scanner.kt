@@ -135,8 +135,8 @@ class Scanner(val source: String) {
     private fun identifier() {
         while (isAlphaNumeric(peek())) advance()
         val text = source.substring(start, current)
-        var type = keywords[text]
-        if (type == null) type = TokenType.IDENTIFIER
+        val type = keywords.getOrElse(text) { TokenType.IDENTIFIER }
+
         addToken(type)
     }
 
