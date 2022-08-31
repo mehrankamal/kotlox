@@ -1,3 +1,6 @@
+package lox.scanner
+
+import error
 
 class Scanner(val source: String) {
 
