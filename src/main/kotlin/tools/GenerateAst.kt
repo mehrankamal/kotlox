@@ -15,7 +15,7 @@ object GenerateAst {
         }
         val outputDir = args[0]
         defineAst(
-            outputDir, "Expr", listOf<String>(
+            outputDir, "Expr", listOf(
                 "Binary   : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
                 "Literal  : Any value",
@@ -34,13 +34,15 @@ object GenerateAst {
         writer.println()
         writer.println("import lox.scanner.Token")
         writer.println()
-        writer.println("abstract class $baseName {}")
+        writer.println("abstract class $baseName")
         writer.println()
 
         for (type in types) {
             val (className, fields) = type.split(":").map { it.trim() }
             defineType(writer, baseName, className, fields)
         }
+
+        defineVisitor(writer, baseName, types)
 
         writer.close()
     }
@@ -51,11 +53,7 @@ object GenerateAst {
     ) {
         var initializer = ""
 
-        // Store parameters in fields.
-        //From: Expr left, Token operator, Expr right
-        //To:   val right: Expr, val operator:Token, val right: Expr
-
-        for (field: String in fields.split(", ")) {
+        for (field in fields.split(", ")) {
             val (type, name) = field.split(" ").map { it.trim() }
             initializer += " val $name:$type,"
         }
@@ -63,8 +61,19 @@ object GenerateAst {
         initializer = initializer.dropLast(1)
 
         writer.println(
-            "class $className($initializer) : $baseName() {}"
+            "class $className($initializer) : $baseName()"
         )
         writer.println()
+    }
+
+    private fun defineVisitor(writer: PrintWriter, baseName: String, types: List<String>) {
+        writer.println("interface Visitor<R> {")
+
+        for (type in types) {
+            val typeName = type.split(":")[0].trim()
+            writer.println("\tfun visit$typeName$baseName (${baseName.lowercase()}: $typeName): R")
+        }
+
+        writer.println("}")
     }
 }
