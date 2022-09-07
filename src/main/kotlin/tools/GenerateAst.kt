@@ -18,7 +18,7 @@ object GenerateAst {
             outputDir, "Expr", listOf(
                 "Binary   : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
-                "Literal  : Any value",
+                "Literal  : Any? value",
                 "Unary    : Token operator, Expr right"
             )
         )
