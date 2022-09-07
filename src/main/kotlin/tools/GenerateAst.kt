@@ -34,7 +34,12 @@ object GenerateAst {
         writer.println()
         writer.println("import lox.scanner.Token")
         writer.println()
-        writer.println("abstract class $baseName")
+        writer.println("abstract class $baseName {")
+        // The base accept() method.
+        writer.println()
+        writer.println("\tabstract fun <R> accept(visitor : Visitor<R>  ) : R")
+
+        writer.println("}")
         writer.println()
 
         for (type in types) {
@@ -60,9 +65,10 @@ object GenerateAst {
 
         initializer = initializer.dropLast(1)
 
-        writer.println(
-            "class $className($initializer) : $baseName()"
-        )
+        writer.println("class $className($initializer) : $baseName() {")
+        writer.println("\toverride fun <R> accept(visitor: Visitor<R>) = visitor.visit$className$baseName(this)")
+        writer.println("}")
+
         writer.println()
     }
 

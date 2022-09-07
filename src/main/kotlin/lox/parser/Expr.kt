@@ -2,15 +2,26 @@ package lox.parser
 
 import lox.scanner.Token
 
-abstract class Expr
+abstract class Expr {
 
-class Binary( val left:Expr, val operator:Token, val right:Expr) : Expr()
+	abstract fun <R> accept(visitor : Visitor<R>  ) : R
+}
 
-class Grouping( val expression:Expr) : Expr()
+class Binary( val left:Expr, val operator:Token, val right:Expr) : Expr() {
+	override fun <R> accept(visitor: Visitor<R>) = visitor.visitBinaryExpr(this)
+}
 
-class Literal( val value:Any) : Expr()
+class Grouping( val expression:Expr) : Expr() {
+	override fun <R> accept(visitor: Visitor<R>) = visitor.visitGroupingExpr(this)
+}
 
-class Unary( val operator:Token, val right:Expr) : Expr()
+class Literal( val value:Any) : Expr() {
+	override fun <R> accept(visitor: Visitor<R>) = visitor.visitLiteralExpr(this)
+}
+
+class Unary( val operator:Token, val right:Expr) : Expr() {
+	override fun <R> accept(visitor: Visitor<R>) = visitor.visitUnaryExpr(this)
+}
 
 interface Visitor<R> {
 	fun visitBinaryExpr (expr: Binary): R
