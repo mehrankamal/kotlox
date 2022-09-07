@@ -1,3 +1,4 @@
+import lox.scanner.Scanner
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -45,7 +46,7 @@ fun runFile(filePath: String) {
 
 fun run(source: String) {
     val scanner = Scanner(source)
-    scanner.scanTokens();
+    scanner.scanTokens()
 
     val tokens = scanner.tokens
 

@@ -1,6 +1,8 @@
+package lox.scanner
+
 class Token(
     private val type: TokenType,
-    private val lexeme: String,
+    val lexeme: String,
     private val literal: Any?,
     private val line: Int
 ) {
