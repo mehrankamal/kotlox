@@ -3,7 +3,6 @@ package lox.parser
 import lox.scanner.Token
 
 abstract class Expr {
-
 	abstract fun <R> accept(visitor : Visitor<R>  ) : R
 }
 
