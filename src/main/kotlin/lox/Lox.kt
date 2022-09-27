@@ -1,10 +1,15 @@
+import lox.AstPrinter
+import lox.parser.Parser
 import lox.scanner.Scanner
+import lox.scanner.Token
+import lox.scanner.TokenType
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 import kotlin.system.exitProcess
+
 
 var hadError = false
 fun main(args: Array<String>) {
@@ -29,7 +34,7 @@ fun runREPL() {
 
         val line = streamReader.readLine() ?: break
         run(line)
-        
+
         hadError = false
     }
 }
@@ -50,13 +55,12 @@ fun run(source: String) {
 
     val tokens = scanner.tokens
 
-    println("=========Scanned Tokens=========")
-    for (token in tokens) {
-        println(token)
-    }
+    val parser = Parser(tokens)
+    val expression = parser.parse()
 
-    println("=========Input Source=========")
-    print(source)
+    if (hadError) return
+
+    println(AstPrinter().print(expression!!))
 }
 
 fun error(line: Int, message: String) {
@@ -66,4 +70,12 @@ fun error(line: Int, message: String) {
 fun report(line: Int, where: String, message: String) {
     System.err.println("[line: $line] Error $where: $message")
     hadError = true
+}
+
+fun error(token: Token, message: String) {
+    if (token.type === TokenType.EOF) {
+        report(token.line, " at end", message)
+    } else {
+        report(token.line, " at '${token.lexeme}'", message)
+    }
 }
