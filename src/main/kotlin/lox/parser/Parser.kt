@@ -6,7 +6,7 @@ import lox.scanner.TokenType.*
 import error as loxError
 
 
-class Parser(val tokens: List<Token>) {
+class Parser(private val tokens: List<Token>) {
 
     private class ParseError : RuntimeException()
 
